@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<title>Underlayer — Gang Sheet Builder</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <div class="sidebar">
+    <div class="brand">
+      <div class="mark"><svg viewBox="0 0 24 24"><path d="M4 16l4-8 4 5 3-4 5 7"/></svg></div>
+      <div><h1>Nate's DTF Gangsheet builder</h1></div>
+    </div>
+
+    <div class="sidebar-scroll">
+
+    <div class="section">
+      <div class="sechead">
+        <span class="icon-badge icon-badge--violet"><svg class="ic" viewBox="0 0 24 24"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span>
+        <h2>Add Designs</h2>
+      </div>
+      <div id="drop">
+        <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 8px;display:block;"><path d="M7 18a4 4 0 0 1-1-7.87A5 5 0 0 1 15 8.5a3.5 3.5 0 0 1 1 6.9"/><path d="M12 12v6M12 12l-2.5 2.5M12 12l2.5 2.5"/></svg>
+        <div class="cta">Drop PNG, SVG, or TIFF files</div>
+        <div class="hint">TIFFs from Step 1 keep their baked-in W1 — no re-choking</div>
+        <input type="file" id="fileInput" accept=".png,.svg,.tif,.tiff,image/png,image/svg+xml,image/tiff" multiple style="display:none">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sechead">
+        <span class="icon-badge icon-badge--blue"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M3 9h18M8 5v4M13 5v4"/></svg></span>
+        <h2>Sheet</h2>
+      </div>
+      <div class="statrow"><span>Width</span><b id="sheetWidthStat">12.20 in (fixed)</b></div>
+      <div class="statrow"><span>Height</span><b id="sheetHeightStat">—</b></div>
+      <div class="unit-row" style="margin-top:8px;">
+        <label>Sheet height</label>
+        <div>
+          <select class="miniinput" id="heightModeSel" style="width:auto;padding-right:4px;">
+            <option value="auto">Auto (fit designs)</option>
+            <option value="fixed">Fixed</option>
+          </select>
+        </div>
+      </div>
+      <div class="unit-row" id="fixedHeightRow" style="display:none;">
+        <label>Fixed height</label>
+        <div><input type="number" class="miniinput" id="fixedHeightInput" step="1" min="2" max="180" value="60"><span class="unit">in</span></div>
+      </div>
+      <div class="note" id="heightNote" style="display:none;">Keep sheets at 180in or less. Longer sheets export very large files and may fail — see the warning on export.</div>
+      <div class="statrow"><span>Resolution</span><b>300 DPI</b></div>
+      <div class="statrow"><span>Pixel size</span><b id="sheetPxStat">—</b></div>
+    </div>
+
+    <div class="section">
+      <div class="sechead">
+        <span class="icon-badge icon-badge--teal"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        <h2>Layout</h2>
+      </div>
+      <div class="unit-row">
+        <label>Margin between designs</label>
+        <div><input type="number" class="miniinput" id="marginInput" step="0.05" min="0" value="0.5"><span class="unit">in</span></div>
+      </div>
+      <div class="unit-row">
+        <label>Preview background</label>
+        <input type="color" id="bgColor" value="#8a8d99" style="width:34px;height:26px;padding:2px;border:1px solid var(--border);border-radius:6px;background:var(--surface-2);">
+      </div>
+      <div class="note">Preview only — lets you spot white ink against a non-white backdrop. The exported file's background stays transparent regardless.</div>
+    </div>
+
+    <div class="section">
+      <div class="sechead">
+        <span class="icon-badge icon-badge--pink"><svg class="ic" viewBox="0 0 24 24"><path d="M6 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/><path d="M18 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/><path d="M8.5 10.5L20 3M8.5 13.5L20 21"/></svg></span>
+        <h2>Sticker Mode</h2>
+      </div>
+      <div class="unit-row">
+        <label>Cut line bleed</label>
+        <div><input type="number" class="miniinput" id="bleedInput" step="0.0625" min="0" value="0.0625"><span class="unit">in</span></div>
+      </div>
+      <div class="note" style="margin-bottom:13px;">Mark individual designs as stickers in their info panel (click the design, then check "Cut Line"). Default bleed of 1/16in is standard for print-and-cut.</div>
+      <button class="btn small full" id="exportCutlinesBtn" disabled>Export Cut Lines (SVG)</button>
+    </div>
+
+    <div class="section">
+      <div class="sechead">
+        <span class="icon-badge icon-badge--amber"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg></span>
+        <h2>Choke (W1)</h2>
+      </div>
+      <div class="row">
+        <label>Contract</label>
+        <select id="contract" style="width:auto;min-width:88px;">
+          <option value="0">0px</option>
+          <option value="1" selected>1px</option>
+          <option value="2">2px</option>
+          <option value="3">3px</option>
+          <option value="4">4px</option>
+          <option value="5">5px</option>
+        </select>
+      </div>
+      <div class="note" style="margin:12px 0 14px;">Applied to every design at export — same choke logic as the single-file tool.</div>
+      <label class="checkrow">
+        Hard Edges (no partial transparency)
+        <input type="checkbox" id="hardEdges">
+      </label>
+      <div class="note" style="margin-top:12px;">Off by default — your printed reference confirmed standard soft anti-aliasing (1-2px) prints best. Turning this on forces every pixel fully opaque or transparent, which will make curves and diagonals look more jagged. Only use it if your printer/RIP handles partial transparency worse than jagged edges.</div>
+    </div>
+
+    <div class="section">
+      <div class="sechead">
+        <span class="icon-badge icon-badge--green"><svg class="ic" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg></span>
+        <h2>Auto Fill Sheet</h2>
+      </div>
+      <div class="note" style="margin-bottom:13px;">Select a design first, then fill the rest of the sheet with copies of it — great for bulk orders of one design.</div>
+      <div class="unit-row">
+        <label>Target length</label>
+        <div><input type="number" class="miniinput" id="fillLengthInput" step="1" min="1" value="36"><span class="unit">in</span></div>
+      </div>
+      <button class="btn small full" id="autoFillBtn" disabled>Fill Sheet with Selected Design</button>
+    </div>
+
+    <div class="section grow">
+      <div class="sechead">
+        <span class="icon-badge icon-badge--slate"><svg class="ic" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
+        <h2>Items <span id="itemCount" style="font-weight:400;letter-spacing:0;color:var(--dim);margin-left:4px;"></span></h2>
+        <button id="expandItemsBtn" class="expandBtn" title="Pop out full list">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></svg>
+        </button>
+      </div>
+      <div id="itemList"><div class="empty-note">No designs yet.</div></div>
+    </div>
+
+    </div>
+
+    <div class="footer-actions">
+      <div class="btn-with-popout">
+        <button class="btn full" id="autoNestBtn">
+          <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          Auto Nest
+        </button>
+        <button class="expandBtn" id="popoutAutoNestBtn" title="Pop out as a floating button">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/></svg>
+        </button>
+      </div>
+      <button class="btn" id="centerBtn">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg>
+        Center All Designs
+      </button>
+      <button class="btn danger" id="clearBtn">
+        <svg class="ic" viewBox="0 0 24 24"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/></svg>
+        Clear Sheet
+      </button>
+      <div class="progress"><i id="progressFill"></i></div>
+      <div class="status-text" id="statusText">Waiting for designs</div>
+      <button class="btn primary full" id="exportBtn" disabled>Export Gang Sheet TIFF</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="toolbar">
+      <div class="hint-text">Click a design to select · drag to move · drag corner to resize · drag empty space or Shift+click to multi-select</div>
+      <div class="zoom-controls">
+        <button id="zoomOut">−</button>
+        <span id="zoomLabel">60%</span>
+        <button id="zoomIn">+</button>
+      </div>
+    </div>
+    <div class="canvas-scroll">
+      <div id="sheetWrap">
+        <canvas id="sheetCanvas"></canvas>
+        <div id="itemLayer" style="position:absolute;inset:0;"></div>
+        <div id="marqueeBox"></div>
+        <div id="infoPanel"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" id="itemsModalOverlay">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <h3>All Items</h3>
+      <button class="minBtn" id="closeItemsModal" title="Close">✕</button>
+    </div>
+    <div class="modal-body" id="itemsModalList"></div>
+  </div>
+</div>
+
+<div class="float-popup" id="duplicatePopup">
+  <div class="float-popup-header" id="duplicatePopupHeader">
+    <span>Design</span>
+    <button class="minBtn" id="closeDuplicatePopup" title="Close">✕</button>
+  </div>
+  <div class="float-popup-body" id="duplicatePopupBody"></div>
+</div>
+
+<div class="float-popup" id="autoNestPopup">
+  <div class="float-popup-header" id="autoNestPopupHeader">
+    <span>Auto Nest</span>
+    <button class="minBtn" id="closeAutoNestPopup" title="Close">✕</button>
+  </div>
+  <div class="float-popup-body">
+    <button class="btn full" id="autoNestPopupBtn">
+      <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+      Auto Nest
+    </button>
+  </div>
+</div>
+
+<div class="float-popup" id="multiSelectPopup">
+  <div class="float-popup-header" id="multiSelectPopupHeader">
+    <span id="multiSelectCount">0 selected</span>
+    <button class="minBtn" id="closeMultiSelectPopup" title="Close">✕</button>
+  </div>
+  <div class="float-popup-body">
+    <div class="float-popup-actions" style="margin-bottom:8px;">
+      <button class="btn small full" id="multiSelectLockBtn">🔒 Lock all (skip Auto Nest)</button>
+    </div>
+    <div class="float-popup-actions">
+      <button class="btn small danger full" id="multiSelectDeleteBtn">Delete all</button>
+    </div>
+  </div>
+</div>
+
+<div class="dialog-overlay" id="preExportOverlay">
+  <div class="dialog-panel">
+    <div class="dialog-icon">
+      <svg viewBox="0 0 24 24" width="26" height="26" style="stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+    </div>
+    <h3>Before you export…</h3>
+    <p class="dialog-text">If you haven't already double-checked your artwork for stray transparent pixels, click the button below to automatically clean them up. Already checked it yourself? You can skip straight to export.</p>
+    <div class="dialog-actions">
+      <button class="btn full" id="removeTransparentBtn">Remove Transparent Pixels</button>
+      <button class="btn primary full" id="alreadyCheckedBtn">I've Double-Checked — Export</button>
+    </div>
+    <button class="dialog-cancel" id="cancelPreExport">Cancel</button>
+  </div>
+</div>
+
+<div class="dialog-overlay" id="exportingOverlay">
+  <div class="dialog-panel dialog-panel--slim">
+    <div class="spinner"></div>
+    <h3 id="exportingTitle">Exporting…</h3>
+    <p class="dialog-text" id="exportingSubtext">Building your gang sheet.</p>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
